@@ -25,7 +25,6 @@ public static class InfrastructureModule
         services.AddSingleton<IRabbitMqConnection, RabbitMqConnection>();
         services.AddScoped<IMessagePublisher, RabbitMqProducer>();
         services.AddScoped<IOrderRepository, OrderRepository>();
-        services.AddScoped<IRabbitMqConsumer, RabbitMqConsumer>();
         services.AddHostedService<RabbitMqTopologySetup>();
 
         return services;
