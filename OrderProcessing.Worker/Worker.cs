@@ -1,25 +1,25 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using OrderProcessing.Infrastructure.Messaging;
 
 namespace OrderProcessing.Worker;
 
 public class Worker : BackgroundService
 {
-    private readonly RabbitMqConsumer _consumer;
-    private readonly IRabbitMqConnection _rabbit;
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly RabbitMqSettings _settings;
 
-    public Worker(
-        IRabbitMqConnection rabbit,
-        RabbitMqConsumer consumer)
+    public Worker(IServiceScopeFactory scopeFactory, IOptions<RabbitMqSettings> options)
     {
-        _rabbit = rabbit;
-        _consumer = consumer;
+        _scopeFactory = scopeFactory;
+        _settings = options.Value;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _rabbit.InitializeAsync();
-        await _consumer.ConsumeAsync("Order");
-
-        await Task.Delay(Timeout.Infinite, stoppingToken);
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var consumer = scope.ServiceProvider.GetRequiredService<IRabbitMqConsumer>();
+        await consumer.ConsumeAsync(_settings.QueueName, stoppingToken);
     }
 }
+

@@ -21,7 +21,7 @@ public class OrdersController : ControllerBase
     }
     
     [HttpGet]
-    [HttpGet("orders/{id:guid}")]
+    [Route("orders/{id:guid}")]
     public IActionResult GetOrder(Guid id)
     {
         // Logic to create an order and send it to the message queue
@@ -29,7 +29,7 @@ public class OrdersController : ControllerBase
     }
     
     [HttpGet]
-    [HttpGet("orders")]
+    [Route("orders")]
     public IActionResult GetOrders()
     {
         // Logic to create an order and send it to the message queue

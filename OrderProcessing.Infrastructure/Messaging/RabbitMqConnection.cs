@@ -1,79 +1,39 @@
-using System.Text;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-
 namespace OrderProcessing.Infrastructure.Messaging;
 
 public interface IRabbitMqConnection
 {
     public Task InitializeAsync();
-    Task PublishAsync(string queue, byte[] body);
-    Task SubscribeAsync(string queue);
+    Task<IChannel> CreateChannelAsync();
 }
 
 public class RabbitMqConnection : IRabbitMqConnection
 {
-    private IConnection _connection;
-    private IChannel _channel;
-
-    private async Task ConnectAsync()
+    private IConnection? _connection;
+    private readonly RabbitMqSettings _settings;
+    
+    public RabbitMqConnection(IOptions<RabbitMqSettings> options)
     {
-        var factory = new ConnectionFactory()
+        _settings = options.Value;
+    }
+
+    public async Task InitializeAsync()
+    {
+        var factory = new ConnectionFactory
         {
-            HostName = "localhost",
+            HostName = _settings.HostName
         };
 
         _connection = await factory.CreateConnectionAsync();
     }
 
-    private async Task CreateChannelAsync()
+    public async Task<IChannel> CreateChannelAsync()
     {
-        _channel = await _connection.CreateChannelAsync();
-    }
+        if (_connection is null)
+            throw new InvalidOperationException("RabbitMQ not initialized.");
 
-    private async Task DeclareQueueAsync()
-    {
-        await _channel.QueueDeclareAsync(queue: "Order",
-            durable: false,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
-    }
-
-    public async Task InitializeAsync()
-    {
-        await ConnectAsync();
-        await CreateChannelAsync();
-        await DeclareQueueAsync();
-    }
-
-    public async Task PublishAsync(string queue, byte[] body)
-    {
-         await _channel.BasicPublishAsync(
-                exchange: "",
-                routingKey: queue,
-                mandatory: false,
-                body: body);
-    }
-
-    public async Task SubscribeAsync(string queue)
-    {
-        var consumer = new AsyncEventingBasicConsumer(_channel);
-
-        consumer.ReceivedAsync += async (sender, args) =>
-        {
-            var body = args.Body.ToArray();
-            var message = Encoding.UTF8.GetString(body);
-
-            // processa mensagem
-            Console.WriteLine(message);
-
-            await Task.CompletedTask;
-        };
-
-        await _channel.BasicConsumeAsync(
-            queue: queue,
-            autoAck: true,
-            consumer: consumer);
+        return await _connection.CreateChannelAsync();
     }
 }

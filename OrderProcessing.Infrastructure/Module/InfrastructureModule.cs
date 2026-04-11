@@ -16,9 +16,15 @@ public static class InfrastructureModule
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection")));
         
+        //RabbitMQ
+        services.Configure<RabbitMqSettings>(
+            configuration.GetSection("RabbitMq"));
+        
         //DI
         services.AddSingleton<IRabbitMqConnection, RabbitMqConnection>();
         services.AddScoped<IMessagePublisher, RabbitMqProducer>();
+        services.AddScoped<IRabbitMqConsumer, RabbitMqConsumer>();
+        services.AddHostedService<RabbitMqTopologySetup>();
 
         return services;
     }
