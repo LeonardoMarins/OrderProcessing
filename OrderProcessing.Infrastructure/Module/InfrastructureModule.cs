@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderProcessing.Application.Interfaces;
+using OrderProcessing.Application.Orders.Commands.CreateOrder;
 using OrderProcessing.Infrastructure.Data;
 using OrderProcessing.Infrastructure.Messaging;
 
@@ -23,6 +24,7 @@ public static class InfrastructureModule
         //DI
         services.AddSingleton<IRabbitMqConnection, RabbitMqConnection>();
         services.AddScoped<IMessagePublisher, RabbitMqProducer>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IRabbitMqConsumer, RabbitMqConsumer>();
         services.AddHostedService<RabbitMqTopologySetup>();
 

@@ -1,14 +1,16 @@
+using OrderProcessing.Application.Orders.Commands.ProcessOrder;
 using OrderProcessing.Infrastructure.Messaging;
 
 namespace OrderProcessing.Worker.Module;
 
 public static class WorkerModule
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddWorker(this IServiceCollection services)
     {
-        services.Configure<RabbitMqSettings>(configuration.GetSection("RabbitMq"));
-        services.AddSingleton<IRabbitMqConnection, RabbitMqConnection>();
-        services.AddScoped<IRabbitMqConsumer, RabbitMqConsumer>();
+        services.AddMediatR(
+            cfg => cfg.RegisterServicesFromAssembly(typeof(ProcessOrderCommand).Assembly));
+        
+        services.AddSingleton<IRabbitMqConsumer, RabbitMqConsumer>();
         services.AddHostedService<RabbitMqTopologySetup>();
 
         return services;

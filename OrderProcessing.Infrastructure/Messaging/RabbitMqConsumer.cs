@@ -1,4 +1,8 @@
 using System.Text;
+using System.Text.Json;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using OrderProcessing.Application.Orders.Commands.ProcessOrder;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -12,11 +16,13 @@ public interface IRabbitMqConsumer : IAsyncDisposable
 public class RabbitMqConsumer : IRabbitMqConsumer, IAsyncDisposable
 {
     private readonly IRabbitMqConnection _rabbit;
+    private readonly IServiceScopeFactory _scopeFactory;
     private IChannel? _channel;
 
-    public RabbitMqConsumer(IRabbitMqConnection rabbit)
+    public RabbitMqConsumer(IRabbitMqConnection rabbit, IServiceScopeFactory scopeFactory)
     {
         _rabbit = rabbit;
+        _scopeFactory = scopeFactory;
     }
 
     public async Task ConsumeAsync(string queueName, CancellationToken cancellationToken)
@@ -29,9 +35,24 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IAsyncDisposable
             try
             {
                 var body = args.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
+                var json = Encoding.UTF8.GetString(body);
 
-                Console.WriteLine(message);
+                var message = JsonSerializer.Deserialize<OrderMessage>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (message is null)
+                    throw new InvalidOperationException("Mensagem inválida recebida na fila.");
+
+                await using var scope = _scopeFactory.CreateAsyncScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+                await mediator.Send(new ProcessOrderCommand(
+                    message.Id,
+                    message.Client,
+                    message.Value,
+                    message.OrderDate), cancellationToken);
 
                 await _channel.BasicAckAsync(args.DeliveryTag, false, cancellationToken);
             }
