@@ -1,0 +1,7 @@
+﻿services:
+  orderprocessing.worker:
+    image: orderprocessing.worker
+    build:
+      context: .
+      dockerfile: OrderProcessing.Worker/Dockerfile
+
