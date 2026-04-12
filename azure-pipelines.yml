@@ -6,51 +6,30 @@ pool:
 
 variables:
   buildConfiguration: Release
+  dockerUser: senseilimao1
+  apiImage: orderprocessing-api
+  workerImage: orderprocessing-worker
 
 steps:
   
   # ======================
-  # .NET SETUP
+  # LOGIN DOCKER HUB
   # ======================
-  - task: UseDotNet@2
-    inputs:
-      packageType: sdk
-      version: '10.x'
+  - script: echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USER) --password-stdin
+    displayName: Docker Login
   
   # ======================
-  # RESTORE
+  # BUILD & PUSH API
   # ======================
-  - script: dotnet restore OrderProcessing.sln
-    displayName: Restore
+  - script: |
+      docker build -t $(dockerUser)/$(apiImage):$(Build.BuildId) -f OrderProcessing.API/Dockerfile .
+      docker push $(dockerUser)/$(apiImage):$(Build.BuildId)
+    displayName: Build & Push API
   
   # ======================
-  # BUILD
+  # BUILD & PUSH WORKER
   # ======================
-  - script: dotnet build OrderProcessing.sln -c $(buildConfiguration) --no-restore
-    displayName: Build
-  
-  # ======================
-  # TESTS
-  # ======================
-  # - script: dotnet test OrderProcessing.sln -c Release --no-build
-  #   displayName: Test
-  
-  # ======================
-  # PUBLISH API
-  # ======================
-  - script: dotnet publish OrderProcessing.API/OrderProcessing.API.csproj -c $(buildConfiguration) --no-build -o $(Build.ArtifactStagingDirectory)/api
-    displayName: Publish API
-  
-  # ======================
-  # PUBLISH WORKER
-  # ======================
-  - script: dotnet publish OrderProcessing.Worker/OrderProcessing.Worker.csproj -c $(buildConfiguration) --no-build -o $(Build.ArtifactStagingDirectory)/worker
-    displayName: Publish Worker
-  
-  # ======================
-  # ARTIFACT
-  # ======================
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathToPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: drop
+  - script: |
+      docker build -t $(dockerUser)/$(workerImage):$(Build.BuildId) -f OrderProcessing.Worker/Dockerfile .
+      docker push $(dockerUser)/$(workerImage):$(Build.BuildId)
+    displayName: Build & Push Worker
