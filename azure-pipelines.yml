@@ -38,13 +38,13 @@ steps:
   # ======================
   # PUBLISH API
   # ======================
-  - script: dotnet publish OrderProcessing.API -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/api
+  - script: dotnet publish OrderProcessing.API/OrderProcessing.API.csproj -c $(buildConfiguration) --no-build -o $(Build.ArtifactStagingDirectory)/api
     displayName: Publish API
   
   # ======================
   # PUBLISH WORKER
   # ======================
-  - script: dotnet publish OrderProcessing.Worker -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/worker
+  - script: dotnet publish OrderProcessing.Worker/OrderProcessing.Worker.csproj -c $(buildConfiguration) --no-build -o $(Build.ArtifactStagingDirectory)/worker
     displayName: Publish Worker
   
   # ======================
