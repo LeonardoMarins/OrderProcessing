@@ -23,7 +23,11 @@ public class RabbitMqConnection : IRabbitMqConnection
     {
         var factory = new ConnectionFactory
         {
-            HostName = _settings.HostName
+            HostName = _settings.HostName,
+            UserName = _settings.UserName,
+            Password = _settings.Password,
+            Port = _settings.Port,
+            VirtualHost = _settings.UserName
         };
 
         _connection = await factory.CreateConnectionAsync();
