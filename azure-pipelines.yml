@@ -6,7 +6,7 @@ pool:
 
 variables:
   buildConfiguration: Release
-  dockerUser: senseilimao1
+  dockerUser: senseilimao1 
   apiImage: orderprocessing-api
   workerImage: orderprocessing-worker
 
