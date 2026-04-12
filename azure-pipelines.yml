@@ -1,0 +1,56 @@
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: Release
+
+steps:
+  
+  # ======================
+  # .NET SETUP
+  # ======================
+  - task: UseDotNet@2
+    inputs:
+      packageType: sdk
+      version: '10.x'
+  
+  # ======================
+  # RESTORE
+  # ======================
+  - script: dotnet restore OrderProcessing.sln
+    displayName: Restore
+  
+  # ======================
+  # BUILD
+  # ======================
+  - script: dotnet build OrderProcessing.sln -c $(buildConfiguration) --no-restore
+    displayName: Build
+  
+  # ======================
+  # TESTS
+  # ======================
+  # - script: dotnet test OrderProcessing.sln -c Release --no-build
+  #   displayName: Test
+  
+  # ======================
+  # PUBLISH API
+  # ======================
+  - script: dotnet publish OrderProcessing.API -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/api
+    displayName: Publish API
+  
+  # ======================
+  # PUBLISH WORKER
+  # ======================
+  - script: dotnet publish OrderProcessing.Worker -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/worker
+    displayName: Publish Worker
+  
+  # ======================
+  # ARTIFACT
+  # ======================
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: drop
