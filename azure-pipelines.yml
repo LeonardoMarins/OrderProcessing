@@ -22,14 +22,14 @@ steps:
   # BUILD & PUSH API
   # ======================
   - script: |
-      docker build -t $(dockerUser)/$(apiImage):$(Build.BuildId) -f OrderProcessing.API/Dockerfile .
+      docker build --platform linux/amd64 -t $(dockerUser)/$(apiImage):$(Build.BuildId) -f OrderProcessing.API/Dockerfile .
       docker push $(dockerUser)/$(apiImage):$(Build.BuildId)
     displayName: Build & Push API
-  
+
   # ======================
   # BUILD & PUSH WORKER
   # ======================
   - script: |
-      docker build -t $(dockerUser)/$(workerImage):$(Build.BuildId) -f OrderProcessing.Worker/Dockerfile .
+      docker build --platform linux/amd64 -t $(dockerUser)/$(workerImage):$(Build.BuildId) -f OrderProcessing.Worker/Dockerfile .
       docker push $(dockerUser)/$(workerImage):$(Build.BuildId)
     displayName: Build & Push Worker
