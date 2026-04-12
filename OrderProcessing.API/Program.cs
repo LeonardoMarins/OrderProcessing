@@ -1,7 +1,13 @@
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using OrderProcessing.Application.Orders.Commands.CreateOrder;
 using OrderProcessing.Infrastructure.Module;
 
 var builder = WebApplication.CreateBuilder(args);
+
+BsonSerializer.RegisterSerializer(
+    new GuidSerializer(GuidRepresentation.Standard));
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
