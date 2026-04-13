@@ -1,0 +1,97 @@
+services:
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: orderprocessing-sqlserver
+    environment:
+      SA_PASSWORD: "Order@2024!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - orderprocessing-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: orderprocessing-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - orderprocessing-network
+
+  mongodb:
+    image: mongo:7
+    container_name: orderprocessing-mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - orderprocessing-network
+
+  api:
+    build:
+      context: .
+      dockerfile: OrderProcessing.API/Dockerfile
+    container_name: orderprocessing-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=OrderProcessingDb;User Id=sa;Password=Order@2024!;TrustServerCertificate=True;"
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__UserName: guest
+      RabbitMq__Password: guest
+      RabbitMq__Port: 5672
+      RabbitMq__QueueName: orders
+      MongoCache__ConnectionString: "mongodb://mongodb:27017"
+      MongoCache__DatabaseName: OrderProcessingCache
+      MongoCache__CollectionName: Orders
+    ports:
+      - "5000:8080"
+    depends_on:
+      - sqlserver
+      - rabbitmq
+      - mongodb
+    networks:
+      - orderprocessing-network
+
+  frontend:
+    build:
+      context: ./OrderProcessing-front
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:5000
+    container_name: orderprocessing-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - orderprocessing-network
+
+  worker:
+    build:
+      context: .
+      dockerfile: OrderProcessing.Worker/Dockerfile
+    container_name: orderprocessing-worker
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=OrderProcessingDb;User Id=sa;Password=Order@2024!;TrustServerCertificate=True;"
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__UserName: guest
+      RabbitMq__Password: guest
+      RabbitMq__Port: 5672
+      RabbitMq__QueueName: orders
+      MongoCache__ConnectionString: "mongodb://mongodb:27017"
+      MongoCache__DatabaseName: OrderProcessingCache
+      MongoCache__CollectionName: Orders
+    depends_on:
+      - sqlserver
+      - rabbitmq
+      - mongodb
+    networks:
+      - orderprocessing-network
+
+networks:
+  orderprocessing-network:
+    driver: bridge

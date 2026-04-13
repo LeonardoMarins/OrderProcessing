@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
+using OrderProcessing.Infrastructure.Data;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using OrderProcessing.Application.Orders.Commands.CreateOrder;
@@ -27,6 +29,12 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {
