@@ -27,7 +27,7 @@ public class RabbitMqConnection : IRabbitMqConnection
             UserName = _settings.UserName,
             Password = _settings.Password,
             Port = _settings.Port,
-            VirtualHost = _settings.UserName
+            VirtualHost = _settings.VirtualHost
         };
 
         _connection = await factory.CreateConnectionAsync();

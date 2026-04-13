@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using OrderProcessing.Application.Orders.Commands.CreateOrder;
 using OrderProcessing.Application.Orders.Queries.GetOrder;
 using OrderProcessing.Application.Orders.Queries.GetOrders;
@@ -11,10 +12,12 @@ namespace OrderProcessing.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ILogger<OrdersController> _logger;
 
-    public OrdersController(IMediator mediator)
+    public OrdersController(IMediator mediator, ILogger<OrdersController> logger)
     {
         _mediator = mediator;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -22,19 +25,26 @@ public class OrdersController : ControllerBase
         [FromBody] CreateOrderCommand command,
         CancellationToken cancellationToken)
     {
-        var id = await _mediator.Send(command, cancellationToken);
-        return CreatedAtAction(nameof(GetOrder), new { id }, null);
+        var result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsError)
+            return Problem(result.FirstError.Description, statusCode: 400);
+
+        _logger.LogInformation("Order created successfully with Id {OrderId}", result.Value);
+        return CreatedAtAction(nameof(GetOrder), new { id = result.Value }, null);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetOrder(Guid id, CancellationToken cancellationToken)
     {
-        var order = await _mediator.Send(new GetOrderQuery(id), cancellationToken);
+        var result = await _mediator.Send(new GetOrderQuery(id), cancellationToken);
 
-        if (order is null)
-            return NotFound();
+        if (result.IsError)
+            return result.FirstError.Type == ErrorOr.ErrorType.NotFound
+                ? NotFound()
+                : Problem(result.FirstError.Description, statusCode: 500);
 
-        return Ok(order);
+        return Ok(result.Value);
     }
 
     [HttpGet]

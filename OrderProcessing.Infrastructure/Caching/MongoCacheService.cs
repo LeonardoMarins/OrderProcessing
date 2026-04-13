@@ -20,7 +20,7 @@ public class MongoCacheService : IMongoCacheService
         _collection = database.GetCollection<Order>(settings.CollectionName);
 
         var indexKeys = Builders<Order>.IndexKeys.Ascending(x => x.Id);
-        _collection.Indexes.CreateOne(new CreateIndexModel<Order>(indexKeys));
+        _collection.Indexes.CreateOneAsync(new CreateIndexModel<Order>(indexKeys));
     }
 
     public async Task<Order?> GetAsync(Guid id)

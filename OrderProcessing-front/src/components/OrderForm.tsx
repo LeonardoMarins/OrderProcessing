@@ -5,7 +5,6 @@ import { useCreateOrder } from '../hooks/use-order';
 interface FormValues {
   client: string;
   value: number;
-  orderData: string;
 }
 
 export function OrderForm() {
@@ -20,22 +19,19 @@ export function OrderForm() {
     defaultValues: {
       client: '',
       value: undefined,
-      orderData: new Date().toISOString().slice(0, 16),
     },
   });
 
   const mutation = useCreateOrder((id) => {
     setSuccessId(id);
-    reset({ client: '', value: undefined, orderData: new Date().toISOString().slice(0, 16) });
+    reset({ client: '', value: undefined });
   });
 
   const onSubmit = (data: FormValues) => {
     setSuccessId(null);
     mutation.mutate({
-      id: crypto.randomUUID(),
       client: data.client.trim(),
       value: Number(data.value),
-      orderData: new Date(data.orderData).toISOString(),
     });
   };
 
@@ -81,16 +77,6 @@ export function OrderForm() {
             })}
           />
           {errors.value && <span className="field-error">{errors.value.message}</span>}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="orderData">Data do Pedido</label>
-          <input
-            id="orderData"
-            type="datetime-local"
-            {...register('orderData', { required: 'A data é obrigatória' })}
-          />
-          {errors.orderData && <span className="field-error">{errors.orderData.message}</span>}
         </div>
 
         <button type="submit" className="btn" disabled={mutation.isPending}>

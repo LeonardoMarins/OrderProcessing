@@ -6,8 +6,6 @@ export interface Order {
 }
 
 export interface CreateOrderPayload {
-  id: string;
   client: string;
   value: number;
-  orderData: string;
 }
