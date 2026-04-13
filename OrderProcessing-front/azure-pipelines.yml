@@ -52,3 +52,13 @@ steps:
     pathToPublish: 'dist'
     artifactName: frontend
   displayName: Publish artifact
+
+# ======================
+# DEPLOY AZURE STATIC WEB APPS
+# ======================
+- script: |
+    npm install -g @azure/static-web-apps-cli
+    swa deploy ./dist \
+      --deployment-token $(AZURE_STATIC_WEB_APPS_TOKEN) \
+      --env production
+  displayName: Deploy to Azure Static Web Apps
