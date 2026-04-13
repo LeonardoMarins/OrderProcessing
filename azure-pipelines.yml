@@ -57,3 +57,32 @@ steps:
         --resource-group $(resourceGroup) \
         --image $(dockerUser)/$(workerImage):$(Build.BuildId)
     displayName: Deploy Worker to Azure Container Apps
+
+  # ======================
+  # FRONTEND - INSTALL & BUILD
+  # ======================
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '20.x'
+    displayName: Install Node.js
+
+  - script: npm ci
+    workingDirectory: OrderProcessing-front
+    displayName: Install frontend dependencies
+
+  - script: npm run build
+    workingDirectory: OrderProcessing-front
+    env:
+      VITE_API_URL: https://order-api.wittyhill-1ef4ba1e.eastus2.azurecontainerapps.io
+    displayName: Build frontend
+
+  # ======================
+  # FRONTEND - DEPLOY
+  # ======================
+  - script: |
+      npm install -g @azure/static-web-apps-cli
+      swa deploy ./dist \
+        --deployment-token $(AZURE_STATIC_WEB_APPS_TOKEN) \
+        --env production
+    workingDirectory: OrderProcessing-front
+    displayName: Deploy frontend to Azure Static Web Apps
