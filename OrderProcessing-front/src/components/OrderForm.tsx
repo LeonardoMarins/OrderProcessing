@@ -8,7 +8,7 @@ interface FormValues {
 }
 
 export function OrderForm() {
-  const [successId, setSuccessId] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const {
     register,
@@ -22,13 +22,13 @@ export function OrderForm() {
     },
   });
 
-  const mutation = useCreateOrder((id) => {
-    setSuccessId(id);
+  const mutation = useCreateOrder(() => {
+    setSuccess(true);
     reset({ client: '', value: undefined });
   });
 
   const onSubmit = (data: FormValues) => {
-    setSuccessId(null);
+    setSuccess(false);
     mutation.mutate({
       client: data.client.trim(),
       value: Number(data.value),
@@ -39,10 +39,9 @@ export function OrderForm() {
     <section className="card">
       <h2 className="card-title">Novo Pedido</h2>
 
-      {successId && (
+      {success && (
         <div className="alert alert-success">
-          Pedido enviado com sucesso!<br />
-          <span className="small">ID: {successId}</span>
+          Pedido enviado com sucesso!
         </div>
       )}
 

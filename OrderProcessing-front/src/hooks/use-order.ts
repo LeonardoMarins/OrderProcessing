@@ -18,14 +18,14 @@ export function useOrder(id: string) {
   });
 }
 
-export function useCreateOrder(onSuccess?: (id: string) => void) {
+export function useCreateOrder(onSuccess?: () => void) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: CreateOrderPayload) => createOrder(payload),
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
-      onSuccess?.(variables.id);
+      onSuccess?.();
     },
   });
 }
