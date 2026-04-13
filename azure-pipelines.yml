@@ -6,9 +6,12 @@ pool:
 
 variables:
   buildConfiguration: Release
-  dockerUser: senseilimao1 
+  dockerUser: senseilimao1
   apiImage: orderprocessing-api
   workerImage: orderprocessing-worker
+  resourceGroup: rg-order
+  apiContainerApp: order-api
+  workerContainerApp: order-worker
 
 steps:
   
@@ -33,3 +36,24 @@ steps:
       docker build --platform linux/amd64 -t $(dockerUser)/$(workerImage):$(Build.BuildId) -f OrderProcessing.Worker/Dockerfile .
       docker push $(dockerUser)/$(workerImage):$(Build.BuildId)
     displayName: Build & Push Worker
+
+  # ======================
+  # DEPLOY API
+  # ======================
+  - script: |
+      az login --service-principal -u $(AZURE_CLIENT_ID) -p $(AZURE_CLIENT_SECRET) --tenant $(AZURE_TENANT_ID)
+      az containerapp update \
+        --name $(apiContainerApp) \
+        --resource-group $(resourceGroup) \
+        --image $(dockerUser)/$(apiImage):$(Build.BuildId)
+    displayName: Deploy API to Azure Container Apps
+
+  # ======================
+  # DEPLOY WORKER
+  # ======================
+  - script: |
+      az containerapp update \
+        --name $(workerContainerApp) \
+        --resource-group $(resourceGroup) \
+        --image $(dockerUser)/$(workerImage):$(Build.BuildId)
+    displayName: Deploy Worker to Azure Container Apps
