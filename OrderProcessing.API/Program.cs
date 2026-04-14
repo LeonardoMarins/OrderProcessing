@@ -54,6 +54,9 @@ try
     if (!string.IsNullOrEmpty(appInsightsConnection))
         otel.UseAzureMonitor(o => o.ConnectionString = appInsightsConnection);
 
+    builder.Services.AddHealthChecks()
+        .AddDbContextCheck<AppDbContext>();
+
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("FrontendPolicy", policy =>
@@ -88,12 +91,13 @@ try
     app.UseRouting();
     app.UseCors("FrontendPolicy");
     app.MapControllers();
+    app.MapHealthChecks("/health");
 
     app.Run();
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Application terminated unexpectedly");
+    Log.Fatal(ex, "API failed during startup");
 }
 finally
 {

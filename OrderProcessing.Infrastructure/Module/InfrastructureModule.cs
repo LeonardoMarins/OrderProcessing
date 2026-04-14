@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using OrderProcessing.Application.Interfaces;
-using OrderProcessing.Application.Orders.Commands.CreateOrder;
 using OrderProcessing.Infrastructure.Caching;
 using OrderProcessing.Infrastructure.Data;
 using OrderProcessing.Infrastructure.Messaging;
+using OrderProcessing.Infrastructure.Repository;
 
 namespace OrderProcessing.Infrastructure.Module;
 
@@ -26,10 +27,7 @@ public static class InfrastructureModule
         
         services.AddSingleton<IMongoClient>(sp =>
         {
-            var settings = sp
-                .GetRequiredService<
-                    Microsoft.Extensions.Options.IOptions<MongoCacheSettings>>()
-                .Value;
+            var settings = sp.GetRequiredService<IOptions<MongoCacheSettings>>().Value;
 
             return new MongoClient(settings.ConnectionString);
         });

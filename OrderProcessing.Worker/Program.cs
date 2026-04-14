@@ -52,7 +52,7 @@ try
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Worker terminated unexpectedly");
+    Log.Fatal(ex, "Worker failed during startup");
 }
 finally
 {

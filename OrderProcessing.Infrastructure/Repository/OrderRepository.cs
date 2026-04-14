@@ -2,8 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using OrderProcessing.Application.Common;
 using OrderProcessing.Application.Interfaces;
 using OrderProcessing.Domain.Entity;
+using OrderProcessing.Infrastructure.Data;
 
-namespace OrderProcessing.Infrastructure.Data;
+namespace OrderProcessing.Infrastructure.Repository;
 
 public class OrderRepository : IOrderRepository
 {

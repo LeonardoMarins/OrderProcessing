@@ -32,8 +32,6 @@ public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, ErrorOr<Order
             return cached;
         }
 
-        _logger.LogInformation("Order {OrderId} not found in cache, querying database", request.Id);
-
         var order = await _repository.GetByIdAsync(request.Id, cancellationToken);
 
         if (order is null)
