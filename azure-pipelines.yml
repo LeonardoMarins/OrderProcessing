@@ -16,6 +16,31 @@ variables:
 steps:
   
   # ======================
+  # BUILD
+  # ======================
+  - script: dotnet build --configuration Release
+    displayName: Build Solution
+
+  # ======================
+  # UNIT TESTS
+  # ======================
+  - script: dotnet test OrderProcessing.UnitTests/OrderProcessing.UnitTests.csproj --no-build --configuration Release --logger trx --results-directory $(Agent.TempDirectory)
+    displayName: Run Unit Tests
+
+  # ======================
+  # INTEGRATION TESTS
+  # ======================
+  - script: dotnet test OrderProcessing.IntegrationTests/OrderProcessing.IntegrationTests.csproj --no-build --configuration Release --logger trx --results-directory $(Agent.TempDirectory)
+    displayName: Run Integration Tests
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '$(Agent.TempDirectory)/*.trx'
+    displayName: Publish Test Results
+    condition: always()
+
+  # ======================
   # LOGIN DOCKER HUB
   # ======================
   - script: echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USER) --password-stdin
