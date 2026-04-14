@@ -38,9 +38,9 @@ steps:
   # ======================
   - script: |
       echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USER) --password-stdin
-      docker build --platform linux/amd64 -t $(dockerUser)/$(apiImage):$(Build.BuildId) -f OrderProcessing.API/Dockerfile .
+      docker build -t $(dockerUser)/$(apiImage):$(Build.BuildId) -f OrderProcessing.API/Dockerfile .
       docker push $(dockerUser)/$(apiImage):$(Build.BuildId)
-      docker build --platform linux/amd64 -t $(dockerUser)/$(workerImage):$(Build.BuildId) -f OrderProcessing.Worker/Dockerfile .
+      docker build -t $(dockerUser)/$(workerImage):$(Build.BuildId) -f OrderProcessing.Worker/Dockerfile .
       docker push $(dockerUser)/$(workerImage):$(Build.BuildId)
     displayName: Build & Push Docker Images
 

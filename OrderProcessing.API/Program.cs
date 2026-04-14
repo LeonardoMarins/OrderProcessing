@@ -32,20 +32,27 @@ try
     builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateOrderCommand).Assembly));
 
-    builder.Services.AddOpenTelemetry()
-        .ConfigureResource(r => r.AddService("OrderProcessing.API"))
-        .WithTracing(t => t
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
-            .AddConsoleExporter())
-        .WithMetrics(m => m
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
-            .AddConsoleExporter());
-
     var appInsightsConnection = builder.Configuration["ApplicationInsights:ConnectionString"];
+
+    var otel = builder.Services.AddOpenTelemetry()
+        .ConfigureResource(r => r.AddService("OrderProcessing.API"))
+        .WithTracing(t =>
+        {
+            t.AddAspNetCoreInstrumentation()
+             .AddHttpClientInstrumentation();
+            if (string.IsNullOrEmpty(appInsightsConnection))
+                t.AddConsoleExporter();
+        })
+        .WithMetrics(m =>
+        {
+            m.AddAspNetCoreInstrumentation()
+             .AddHttpClientInstrumentation();
+            if (string.IsNullOrEmpty(appInsightsConnection))
+                m.AddConsoleExporter();
+        });
+
     if (!string.IsNullOrEmpty(appInsightsConnection))
-        builder.Services.AddOpenTelemetry().UseAzureMonitor(o => o.ConnectionString = appInsightsConnection);
+        otel.UseAzureMonitor(o => o.ConnectionString = appInsightsConnection);
 
     builder.Services.AddCors(options =>
     {

@@ -1,5 +1,5 @@
 using Azure.Monitor.OpenTelemetry.Exporter;
-using OpenTelemetry;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OrderProcessing.Infrastructure.Module;
@@ -21,12 +21,26 @@ try
             "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}"));
 
     var appInsightsConnection = builder.Configuration["ApplicationInsights:ConnectionString"];
+
+    var otel = builder.Services.AddOpenTelemetry()
+        .ConfigureResource(r => r.AddService("OrderProcessing.Worker"))
+        .WithTracing(t =>
+        {
+            t.AddSource("OrderProcessing.Worker");
+            if (string.IsNullOrEmpty(appInsightsConnection))
+                t.AddConsoleExporter();
+        })
+        .WithMetrics(m =>
+        {
+            m.AddRuntimeInstrumentation();
+            if (string.IsNullOrEmpty(appInsightsConnection))
+                m.AddConsoleExporter();
+        });
+
     if (!string.IsNullOrEmpty(appInsightsConnection))
     {
-        builder.Services.AddOpenTelemetry()
-            .ConfigureResource(r => r.AddService("OrderProcessing.Worker"))
-            .WithTracing(t => t.AddAzureMonitorTraceExporter(o =>
-                o.ConnectionString = appInsightsConnection));
+        otel.WithTracing(t => t.AddAzureMonitorTraceExporter(o => o.ConnectionString = appInsightsConnection))
+            .WithMetrics(m => m.AddAzureMonitorMetricExporter(o => o.ConnectionString = appInsightsConnection));
     }
 
     builder.Services.AddInfrastructure(builder.Configuration);
