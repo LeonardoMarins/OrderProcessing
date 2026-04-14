@@ -2,10 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createOrder, getOrder, getOrders } from '../client/orders';
 import type { CreateOrderPayload } from '../types/order';
 
-export function useOrders() {
+export function useOrders(page: number = 1, pageSize: number = 10) {
   return useQuery({
-    queryKey: ['orders'],
-    queryFn: getOrders,
+    queryKey: ['orders', page, pageSize],
+    queryFn: () => getOrders(page, pageSize),
   });
 }
 

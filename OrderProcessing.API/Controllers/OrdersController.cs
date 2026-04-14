@@ -48,9 +48,12 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetOrders(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetOrders(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
-        var orders = await _mediator.Send(new GetOrdersQuery(), cancellationToken);
-        return Ok(orders);
+        var result = await _mediator.Send(new GetOrdersQuery(page, pageSize), cancellationToken);
+        return Ok(result);
     }
 }

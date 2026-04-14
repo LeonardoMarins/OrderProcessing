@@ -1,10 +1,11 @@
 using MediatR;
+using OrderProcessing.Application.Common;
 using OrderProcessing.Application.Interfaces;
 using OrderProcessing.Domain.Entity;
 
 namespace OrderProcessing.Application.Orders.Queries.GetOrders;
 
-public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, IEnumerable<Order>>
+public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, PagedList<Order>>
 {
     private readonly IOrderRepository _repository;
 
@@ -13,8 +14,8 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, IEnumerable
         _repository = repository;
     }
 
-    public async Task<IEnumerable<Order>> Handle(GetOrdersQuery request, CancellationToken cancellationToken)
+    public async Task<PagedList<Order>> Handle(GetOrdersQuery request, CancellationToken cancellationToken)
     {
-        return await _repository.GetAllAsync(cancellationToken);
+        return await _repository.GetAllAsync(request.Page, request.PageSize, cancellationToken);
     }
 }

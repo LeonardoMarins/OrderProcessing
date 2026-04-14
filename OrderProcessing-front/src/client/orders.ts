@@ -1,4 +1,4 @@
-import type { CreateOrderPayload, Order } from '../types/order';
+import type { CreateOrderPayload, Order, PagedList } from '../types/order';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
@@ -27,7 +27,7 @@ export const getOrder = async (id: string): Promise<Order> => {
   return handleResponse<Order>(res);
 };
 
-export const getOrders = async (): Promise<Order[]> => {
-  const res = await fetch(`${BASE_URL}/orders`);
-  return handleResponse<Order[]>(res);
+export const getOrders = async (page: number, pageSize: number): Promise<PagedList<Order>> => {
+  const res = await fetch(`${BASE_URL}/orders?page=${page}&pageSize=${pageSize}`);
+  return handleResponse<PagedList<Order>>(res);
 };
