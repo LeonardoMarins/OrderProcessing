@@ -45,7 +45,7 @@ try
 
     var appInsightsConnection = builder.Configuration["ApplicationInsights:ConnectionString"];
     if (!string.IsNullOrEmpty(appInsightsConnection))
-        builder.Services.AddOpenTelemetry().UseAzureMonitor();
+        builder.Services.AddOpenTelemetry().UseAzureMonitor(o => o.ConnectionString = appInsightsConnection);
 
     builder.Services.AddCors(options =>
     {
