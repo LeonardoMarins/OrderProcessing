@@ -21,6 +21,12 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Err
 
     public async Task<ErrorOr<Guid>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(request.Client))
+            return Error.Validation("Order.Client", "Client name is required.");
+
+        if (request.Value <= 0)
+            return Error.Validation("Order.Value", "Order value must be greater than zero.");
+
         var order = Order.Create(request.Client, request.Value);
 
         _logger.LogInformation("Publishing order {OrderId} for client {Client}", order.Id, order.Client);

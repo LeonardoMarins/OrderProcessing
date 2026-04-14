@@ -6,8 +6,6 @@ using MongoDB.Bson.Serialization.Serializers;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
-using FluentValidation;
-using OrderProcessing.Application.Behaviors;
 using OrderProcessing.Application.Orders.Commands.CreateOrder;
 using OrderProcessing.Infrastructure.Data;
 using OrderProcessing.Infrastructure.Module;
@@ -32,12 +30,7 @@ try
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddInfrastructure(builder.Configuration);
-    builder.Services.AddValidatorsFromAssembly(typeof(CreateOrderCommand).Assembly);
-    builder.Services.AddMediatR(cfg =>
-    {
-        cfg.RegisterServicesFromAssembly(typeof(CreateOrderCommand).Assembly);
-        cfg.AddOpenBehavior(typeof(ValidationPipelineBehavior<,>));
-    });
+    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateOrderCommand).Assembly));
 
     var appInsightsConnection = builder.Configuration["ApplicationInsights:ConnectionString"];
 
