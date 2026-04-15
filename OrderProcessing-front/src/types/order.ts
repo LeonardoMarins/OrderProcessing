@@ -6,8 +6,10 @@ export interface Order {
 }
 
 export interface CreateOrderPayload {
+  id: string;
   client: string;
   value: number;
+  orderDate: string;
 }
 
 export interface PagedList<T> {

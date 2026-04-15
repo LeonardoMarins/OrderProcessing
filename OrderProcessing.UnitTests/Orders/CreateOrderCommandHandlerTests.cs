@@ -22,7 +22,7 @@ public class CreateOrderCommandHandlerTests
     [Fact]
     public async Task Handle_ValidCommand_ReturnsGuid()
     {
-        var command = new CreateOrderCommand("Cliente Teste", 100.00m);
+        var command = new CreateOrderCommand(Guid.NewGuid(), "Cliente Teste", 100.00m, DateTime.UtcNow);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -33,7 +33,7 @@ public class CreateOrderCommandHandlerTests
     [Fact]
     public async Task Handle_ValidCommand_PublishesMessage()
     {
-        var command = new CreateOrderCommand("Cliente Teste", 100.00m);
+        var command = new CreateOrderCommand(Guid.NewGuid(), "Cliente Teste", 100.00m, DateTime.UtcNow);
 
         await _handler.Handle(command, CancellationToken.None);
 
@@ -43,7 +43,7 @@ public class CreateOrderCommandHandlerTests
     [Fact]
     public async Task Handle_EmptyClient_ReturnsValidationError()
     {
-        var command = new CreateOrderCommand("", 100.00m);
+        var command = new CreateOrderCommand(Guid.NewGuid(), "", 100.00m, DateTime.UtcNow);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -54,7 +54,7 @@ public class CreateOrderCommandHandlerTests
     [Fact]
     public async Task Handle_ZeroValue_ReturnsValidationError()
     {
-        var command = new CreateOrderCommand("Cliente Teste", 0m);
+        var command = new CreateOrderCommand(Guid.NewGuid(), "Cliente Teste", 0m, DateTime.UtcNow);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -65,7 +65,7 @@ public class CreateOrderCommandHandlerTests
     [Fact]
     public async Task Handle_NegativeValue_ReturnsValidationError()
     {
-        var command = new CreateOrderCommand("Cliente Teste", -10m);
+        var command = new CreateOrderCommand(Guid.NewGuid(), "Cliente Teste", -10m, DateTime.UtcNow);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 

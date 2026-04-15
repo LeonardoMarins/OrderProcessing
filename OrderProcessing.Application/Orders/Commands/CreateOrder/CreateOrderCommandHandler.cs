@@ -27,7 +27,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Err
         if (request.Value <= 0)
             return Error.Validation("Order.Value", "Order value must be greater than zero.");
 
-        var order = Order.Create(request.Client, request.Value);
+        var order = Order.Restore(request.Id, request.Client, request.Value, request.OrderDate);
 
         _logger.LogInformation("Publishing order {OrderId} for client {Client}", order.Id, order.Client);
 

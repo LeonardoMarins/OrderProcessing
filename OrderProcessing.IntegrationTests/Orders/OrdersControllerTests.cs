@@ -17,7 +17,7 @@ public class OrdersControllerTests : IClassFixture<OrderProcessingWebFactory>
     [Fact]
     public async Task PostOrder_ValidPayload_Returns201()
     {
-        var payload = new { client = "Cliente Teste", value = 100.00 };
+        var payload = new { id = Guid.NewGuid(), client = "Cliente Teste", value = 100.00, orderDate = DateTime.UtcNow };
 
         var response = await _client.PostAsJsonAsync("/orders", payload);
 
@@ -27,7 +27,7 @@ public class OrdersControllerTests : IClassFixture<OrderProcessingWebFactory>
     [Fact]
     public async Task PostOrder_EmptyClient_Returns400()
     {
-        var payload = new { client = "", value = 100.00 };
+        var payload = new { id = Guid.NewGuid(), client = "", value = 100.00, orderDate = DateTime.UtcNow };
 
         var response = await _client.PostAsJsonAsync("/orders", payload);
 
@@ -37,7 +37,7 @@ public class OrdersControllerTests : IClassFixture<OrderProcessingWebFactory>
     [Fact]
     public async Task PostOrder_ZeroValue_Returns400()
     {
-        var payload = new { client = "Cliente Teste", value = 0 };
+        var payload = new { id = Guid.NewGuid(), client = "Cliente Teste", value = 0, orderDate = DateTime.UtcNow };
 
         var response = await _client.PostAsJsonAsync("/orders", payload);
 
